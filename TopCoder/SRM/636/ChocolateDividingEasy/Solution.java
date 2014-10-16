@@ -1,5 +1,10 @@
+//-----------------------------------------------------------------------
+// <copyright file="Solution.cs" company="MyCompany">
+//     Copyright (c) MyCompany. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
+package topcoder.srm636.ChocolateDividingEasy;
 import java.util.*;
-
 
 public class Solution {
 	public static void main(String[] args)
