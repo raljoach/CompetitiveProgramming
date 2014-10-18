@@ -12,20 +12,21 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import sun.misc.Queue;
+
 public class Solution {
     private static HashMap<Integer, List<Integer>> emptyCells = new HashMap<Integer, List<Integer>>();
 
 	public static void main(String[] args) throws Exception {
 		//test();
 		String[] grid = new String[]{
-				".#..#"				
+				".#.#."				
 		};
 		int r = 2;
 		solve(grid,r);
-
 	}
 	
-	private static void solve(String[] grid, int r)
+	private static void solve(String[] grid, int r) throws Exception
 	{
 		processGrid(grid);
 		ArrayList<RabbitLocation> rabbitLocs = new ArrayList<RabbitLocation>();
@@ -39,29 +40,66 @@ public class Solution {
 		}		
 		
 		createGraph(rabbitLocs);
-		int ans = calcConnectedComponents(rabbitLocs);
+		int ans = calcComponents(rabbitLocs);
 		System.out.println(ans);
 	}
 	
-	private static Integer calcConnectedComponents(
-			ArrayList<RabbitLocation> rabbitLocs) {
-		// TODO Auto-generated method stub
-		return null;
+	private static Integer calcComponents(
+			ArrayList<RabbitLocation> rabbitLocs) throws Exception {		
+		int components = 0;
+		for(int i=0; i<rabbitLocs.size(); i++){
+			RabbitLocation start = rabbitLocs.get(i);
+			if(!start.visited){
+				++components;
+				bfs(start);
+			}
+		}
+		return components;
+	}
+
+	private static void bfs(RabbitLocation start) throws InterruptedException {
+		Queue q = new Queue();
+		q.enqueue(start);
+		start.visited = true;
+		
+		while(!q.isEmpty()){
+			RabbitLocation next = (RabbitLocation) q.dequeue();
+			if(!next.nearest.visited){
+				next.nearest.visited = true;
+				q.enqueue(next.nearest);
+			}
+		}
 	}
 
 	private static void createGraph(ArrayList<RabbitLocation> rabbitLocs) {
-		// TODO Auto-generated method stub
 		for(int i=0; i<rabbitLocs.size(); i++){
 			RabbitLocation thisRabbit = rabbitLocs.get(i);
-			RabbitLocation nearest = getMinDistance(i,rabbitLocs);
+			RabbitLocation nearest = findClosestRabbit(i,rabbitLocs);
 			thisRabbit.nearest = nearest;
 		}
 	}
 
-	private static RabbitLocation getMinDistance(int i,
+	private static RabbitLocation findClosestRabbit(int i,
 			ArrayList<RabbitLocation> rabbitLocs) {
-		// TODO Auto-generated method stub
-		return null;
+		double minDist = Double.MAX_VALUE;		
+		RabbitLocation x = rabbitLocs.get(i);
+		RabbitLocation closestRabbit = null;
+		for(int j=0; j<rabbitLocs.size(); j++){
+			if(j==i){ continue; }
+			RabbitLocation thisRabbit = rabbitLocs.get(j);
+			double dist = calcDistance(x.location,thisRabbit.location);
+			if(dist<minDist){
+				minDist = dist;
+				closestRabbit = thisRabbit;
+			}
+			else if(dist==minDist){
+				if(thisRabbit.location.y < closestRabbit.location.y){
+					closestRabbit = thisRabbit;
+				}
+			}
+		}
+			
+		return closestRabbit;
 	}
 
 	private static void test() throws Exception
