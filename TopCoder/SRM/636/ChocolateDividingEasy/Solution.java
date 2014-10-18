@@ -98,6 +98,7 @@ public class Solution {
 		}
 		
 		bestMinPiece = Math.max(min, bestMinPiece);
+		System.out.println("Calculated min: " + min);
 		System.out.println("Best min piece:" + bestMinPiece);
 		System.out.println();
 		System.out.println("---------------------");		
@@ -106,14 +107,6 @@ public class Solution {
 		System.out.println("Colstart:" + colStart + " Colend:" + colEnd);
 		System.out.println("Rowstart:" + rowStart + " Rowend:"+rowEnd);
 		
-		if(rowEnd<rowStart)
-		{
-			System.out.println("That sucks!");
-		}
-		if(colEnd<colStart)
-		{
-			System.out.println("That sucks!");
-		}
 		int sum = 0;
 		for(int i=rowStart; i<=rowEnd; i++){
 			for(int j=colStart; j<=colEnd; j++){
