@@ -12,11 +12,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-public class RabbitLocation{
-	public int rabbit;
-	public Point location;
-	public RabbitLocation nearest;
-}
 public class Solution {
     private static HashMap<Integer, List<Integer>> emptyCells = new HashMap<Integer, List<Integer>>();
 
