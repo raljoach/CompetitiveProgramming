@@ -6,4 +6,5 @@ public class RabbitLocation{
 	public int rabbit;
 	public Point location;
 	public RabbitLocation nearest;
+	public boolean visited = false;
 }

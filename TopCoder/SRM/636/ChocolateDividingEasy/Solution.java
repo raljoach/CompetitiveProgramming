@@ -21,8 +21,11 @@ public class Solution {
 	}
 
 	private static int bestMinPiece = Integer.MIN_VALUE;
+	private static int[][] sumGrid;
 	private static int solve(
-			int[][] grid, int numVerticalCuts, int numHorizontalCuts) {		
+			int[][] grid, int numVerticalCuts, int numHorizontalCuts) {	
+		
+		precompute(grid);
 		
 		List<List<Integer>> vCutsList = getCuts(grid.length, numVerticalCuts);
 		List<List<Integer>> hCutsList = getCuts(grid[0].length, numHorizontalCuts);
@@ -60,6 +63,27 @@ public class Solution {
 		}
 		return results;
 	}
+	
+	private static void precompute(int[][] grid){
+		int n = grid.length, m = grid[0].length;
+		sumGrid = new int[n][m];
+		for(int i=0; i<n; i++){
+			for(int j=0; j<m; j++){
+				int sum = grid[i][j];
+				if(i>0){
+					sum+=sumGrid[i-1][j];
+				}
+				if(j>0){
+					sum+=sumGrid[i][j-1];
+				}
+				if(i>0 && j>0){
+					sum-=sumGrid[i-1][j-1];
+				}
+				sumGrid[i][j]=sum;
+			}
+		}
+	}
+	
 	private static void calculateBestMinPiece(int[][] grid,
 			List<Integer> hCuts1, List<Integer> vCuts1) {
 
@@ -103,17 +127,30 @@ public class Solution {
 		System.out.println();
 		System.out.println("---------------------");		
 	}
-	private static int getSum(int[][] grid, int rowStart, Integer rowEnd, int colStart, Integer colEnd) {
+	private static int getSum(
+			int[][] grid, int rowStart, Integer rowEnd, 
+			int colStart, Integer colEnd) {
 		System.out.println("Colstart:" + colStart + " Colend:" + colEnd);
 		System.out.println("Rowstart:" + rowStart + " Rowend:"+rowEnd);
 		
-		int sum = 0;
-		for(int i=rowStart; i<=rowEnd; i++){
-			for(int j=colStart; j<=colEnd; j++){
-				sum+=grid[i][j];
-			}
+		int sum = sumGrid[rowEnd][colEnd];
+		System.out.print("Sum at("+rowEnd+","+colEnd+"): " + sum);
+		if(rowStart>0){
+			int amt = sumGrid[rowStart-1][colEnd];
+			sum -= amt;
+			System.out.print("-(A)"+amt);
 		}
-		return sum;		
-	}
-
+		if(colStart>0){
+			int amt = sumGrid[rowEnd][colStart-1];
+			sum -= amt;
+			System.out.print("-(B)"+amt);
+		}
+		if(rowStart>0 && colStart>0){
+			int amt = sumGrid[rowStart-1][colStart-1];
+			sum += amt;
+			System.out.print("+(C)"+amt);
+		}
+		System.out.println("="+sum);
+		return sum;
+	}	
 }
