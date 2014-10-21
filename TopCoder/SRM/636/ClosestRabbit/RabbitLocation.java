@@ -7,4 +7,5 @@ public class RabbitLocation{
 	public Point location;
 	public RabbitLocation nearest;
 	public boolean visited = false;
+	public String label;
 }

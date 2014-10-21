@@ -12,21 +12,21 @@ import java.util.List;
 import sun.misc.Queue;
 
 public class Solution {
-    public static void main(String[] args) throws Exception {
-    	int test=-1;
-        
-    	//0
+	public static void main(String[] args) throws Exception {
+		int test=-1;
+
+		//0
 		String[] grid = new String[]{
 				".#.#."				
 		};
 		int r = 2;
 		double expected = 1.0;
 		test = test(test, grid, r, expected);		
-		
+/*
 		//1
 		grid = new String[]{
 				"..###.",
-		 		".###.#"};		 
+		".###.#"};		 
 		r = 4;
 		expected = 1.6;
 		test = test(test, grid, r, expected);
@@ -38,36 +38,37 @@ public class Solution {
 		r=5;		 
 		expected = 2.0;
 		test = test(test, grid, r, expected);
-		
+
 		//3
 		grid = new String[]{
 				".....",
 				"#...."};
-		 
+
 		r=4;		 
 		expected = 1.253968253968254;
 		test = test(test, grid, r, expected);
-		
+*/
 		//4
 		grid = new String[]{
-				".#####.#####..#....#",
-				 "#......#....#.##..##",
-				 ".####..#####..#.##.#",
-				 ".....#.#...#..#....#",
-				 "#####..#....#.#....#"};
- 
+				".#####.#####..#....#", //8
+				 "#......#....#.##..##",//13
+				 ".####..#####..#.##.#",//7
+				 ".....#.#...#..#....#",//15
+				 "#####..#....#.#....#"};//11
+
 		r=19;
 		expected = 5.77311527122319;	
-		test = test(test, grid, r, expected);
+		test = test(test, grid, r, expected);		 
 	}
 
-	private static int test(int test, String[] grid, int r, double expected)
+	private static int test(int test, String[] grid, int rabbitCount, double expected)
 			throws Exception {
 		System.out.println("Test"+ (++test));
-		double avg = solve(grid,r);
+		double avg = solve(grid,rabbitCount);
 		for(String line:grid){
 			System.out.println(line);
 		}
+		System.out.println(rabbitCount);
 		System.out.println("Expected:"+expected);
 		System.out.println("Actual:"+avg);
 		if(expected==avg)
@@ -80,88 +81,108 @@ public class Solution {
 		System.out.println("-----------------");
 		return test;
 	}
-	
+
 	private static double solve(String[] grid, int rabbitCount) throws Exception
 	{	
 		ArrayList<Cell> emptyCells = getEmptyCells(grid);
 		if(rabbitCount>emptyCells.size()){
 			throw new Exception("Too many rabbits:" + rabbitCount + 
-					            " Not enough empty cells:" + emptyCells.size());
+					" Not enough empty cells:" + emptyCells.size());
 		}
-	    List<List<RabbitLocation>> perms = 
-	    		getAllPermutations(emptyCells,rabbitCount);
-	    double sum = 0;
-	    double count = perms.size();
-	    for(List<RabbitLocation> rabbitLocs:perms){
-	    	createGraph(rabbitLocs);
-	    	sum += calcComponents(rabbitLocs);
-	    }
-	    double avg = sum/count;
+		List<List<RabbitLocation>> perms = 
+				chooseRabbitCells(emptyCells,rabbitCount);
+		System.out.println("Number of combos: " + perms.size());
+		double sum = 0;
+		double count = perms.size();
+		double howMany=0;
+		for(List<RabbitLocation> rabbitLocs:perms){
+			int[] neighbors = createGraph(rabbitLocs);
+			int n = calcComponents(rabbitLocs,neighbors);
+			sum+=n;
+			howMany++;
+		}
+		double avg = sum/count;
 		return avg;
 	}
-	
-	private static List<List<RabbitLocation>> getAllPermutations(
-			ArrayList<Cell> emptyCells, int rabbitCount) {
-		int count = 0;
-		List<String> labels = new ArrayList<String>();
-		for(int i=0; i<emptyCells.size(); i++){
-			if(rabbitCount>0){
-				labels.add("R"+rabbitCount);
-				--rabbitCount;
-			}
-			else{
-				count++;
-				labels.add("E"+count);
-			}
-		}
-				
-		List<List<String>> labelPerms = getPerms(labels,0);
-		
+
+	private static List<List<RabbitLocation>> chooseRabbitCells(
+			List<Cell> emptyCells, int rabbitCount) {
+		List<Cell[]> sets = getCombos(emptyCells,rabbitCount);
 		List<List<RabbitLocation>> results = new ArrayList<List<RabbitLocation>>();
-		for(List<String> set:labelPerms){
+		for(Cell[] set:sets){
 			List<RabbitLocation> rabbitSet = new ArrayList<RabbitLocation>();
-			for(int i=0; i<set.size(); i++){
-				String label = set.get(i);
-				Cell cell = emptyCells.get(i);
-				if(label.startsWith("R")){					
-					RabbitLocation rabbit = new RabbitLocation();
-					rabbit.location = cell.location;
-					rabbit.rabbit = Integer.parseInt(label.substring(1));
-					rabbitSet.add(rabbit);
-				}
+			int rCount=0;
+			for(int i=0; i<set.length; i++){
+				Cell cell = set[i];
+				RabbitLocation rabbit = new RabbitLocation();
+				rabbit.location = cell.location;
+				rabbit.rabbit = rCount++;
+				rabbit.label = cell.label;
+				rabbitSet.add(rabbit);				
 			}
 			results.add(rabbitSet);
 		}
 		return results;
 	}
 
-	private static List<List<String>>  getPerms(			
-			List<String> labels,
-			int index) {
-		List<List<String>> result = new ArrayList<List<String>>();
-		if(index==labels.size()) { 			
-			result.add(new ArrayList<String>());
-			return result;
-		}
-		String item = labels.get(index); 
-		List<List<String>> subPerms = getPerms(labels,index+1);
-		for(List<String> subSet:subPerms){
-			for(int i=0; i<=subSet.size(); i++){
-				List<String> newSet = new ArrayList<String>(subSet);
-				newSet.add(i, item);
-				result.add(newSet);
-			}			
-		}
+	private static List<Cell[]>  getCombos(
+			List<Cell> items,
+			int numSlots){
+		List<Cell[]> result = new ArrayList<Cell[]>();
+		Cell[] combo = new Cell[numSlots];		
+		setNextSlot(combo,items,0,numSlots,0,result);
 		return result;
+	}
+
+	private static void setNextSlot(Cell[] combo, List<Cell> items, int startItemIndex,
+			int numSlots, int startSlotIndex,List<Cell[]> result) {
+		int slotIndex = startSlotIndex;		
+		int remainingSlots = numSlots-slotIndex-1;
+
+		if(!addCombo(combo,slotIndex,numSlots,result)){
+			for(int itemIndex=startItemIndex; 
+				itemIndex<items.size() && remainingSlots<=(items.size()-itemIndex-1); itemIndex++){
+			
+				setSlot(combo,items,itemIndex,slotIndex);
+				setNextSlot(combo,items,itemIndex+1,numSlots,slotIndex+1,result);
+			}
+		}
+	}
+
+	private static void setSlot(Cell[] combo, List<Cell> items, int itemIndex,
+			int slotIndex) {
+		combo[slotIndex] = items.get(itemIndex);
+		//System.out.println("Slot "+slotIndex+", Cell:"+combo[slotIndex].label);
+	}
+
+	private static boolean addCombo(Cell[] combo, int slotIndex, int numSlots,
+			List<Cell[]> result) {
+		boolean added = false;
+		if(slotIndex==numSlots){
+			added = true;
+			//result.add(combo);
+			//System.out.println("------------------");
+			System.out.print("Set: ");
+			Cell[] newCombo = new Cell[combo.length];
+			int current = 0;
+			for(Cell cell:combo){
+				System.out.print(cell.label+" ");
+				newCombo[current++]=cell;
+			}
+			result.add(newCombo);
+			System.out.println("\n------------------");
+		}
+		return added;
 	}
 
 	private static ArrayList<Cell> getEmptyCells(String[] grid) {
 		ArrayList<Cell> results = new ArrayList<Cell>();
+		int count = 0;
 		for(int i=0; i<grid.length; i++){
 			for(int j=0; j<grid[0].length(); j++){
 				char c = grid[i].charAt(j);
 				if(c=='.'){
-					results.add(new Cell(new Point(i,j)));
+					results.add(new Cell(new Point(i,j),"E"+(++count)));
 				}
 			}
 		}
@@ -169,13 +190,24 @@ public class Solution {
 	}
 
 	private static Integer calcComponents(
-			List<RabbitLocation> rabbitLocs) throws Exception {		
+			List<RabbitLocation> rabbitLocs,int[] neighbors) throws Exception {		
 		int components = 0;
+		/*
 		for(int i=0; i<rabbitLocs.size(); i++){
 			RabbitLocation start = rabbitLocs.get(i);
 			if(!start.visited){
 				++components;
 				bfs(start);
+			}
+		}*/
+
+		for(int i=0; i<neighbors.length; i++){
+			for(int j=0; j<neighbors.length; j++){
+				if(i!=j){
+					if(neighbors[i]==j && i==neighbors[j] && i<j){
+						++components;
+					}
+				}
 			}
 		}
 		return components;
@@ -185,7 +217,7 @@ public class Solution {
 		Queue q = new Queue();
 		q.enqueue(start);
 		start.visited = true;
-		
+
 		while(!q.isEmpty()){
 			RabbitLocation next = (RabbitLocation) q.dequeue();
 			if(!next.nearest.visited){
@@ -195,16 +227,20 @@ public class Solution {
 		}
 	}
 
-	private static void createGraph(List<RabbitLocation> rabbitLocs) {
+	private static int[] createGraph(List<RabbitLocation> rabbitLocs) {
+		int[] neighbors = new int[rabbitLocs.size()];
 		for(int i=0; i<rabbitLocs.size(); i++){
 			RabbitLocation thisRabbit = rabbitLocs.get(i);
-			RabbitLocation nearest = findClosestRabbit(i,rabbitLocs);
+			RabbitLocation nearest = findClosestRabbit(i,rabbitLocs,neighbors);
 			thisRabbit.nearest = nearest;
 		}
+		return neighbors;
 	}
 
-	private static RabbitLocation findClosestRabbit(int i,
-			List<RabbitLocation> rabbitLocs) {
+	private static RabbitLocation findClosestRabbit(
+			int i,
+			List<RabbitLocation> rabbitLocs,
+			int[] neighbors) {
 		double minDist = Double.MAX_VALUE;		
 		RabbitLocation x = rabbitLocs.get(i);
 		RabbitLocation closestRabbit = null;
@@ -222,10 +258,10 @@ public class Solution {
 				}
 			}
 		}
-			
+		neighbors[x.rabbit]=closestRabbit.rabbit;	
 		return closestRabbit;
 	}
-	
+
 	private static double calcDistance(Point p1, Point p2)
 	{
 		return Math.sqrt(Math.pow(p1.x - p2.x,2) + Math.pow(p1.y-p2.y,2));
