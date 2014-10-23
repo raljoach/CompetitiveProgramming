@@ -22,7 +22,7 @@ public class Solution {
 		int r = 2;
 		double expected = 1.0;
 		test = test(test, grid, r, expected);		
-/*
+
 		//1
 		grid = new String[]{
 				"..###.",
@@ -38,7 +38,7 @@ public class Solution {
 		r=5;		 
 		expected = 2.0;
 		test = test(test, grid, r, expected);
-
+		
 		//3
 		grid = new String[]{
 				".....",
@@ -47,7 +47,7 @@ public class Solution {
 		r=4;		 
 		expected = 1.253968253968254;
 		test = test(test, grid, r, expected);
-*/
+/*
 		//4
 		grid = new String[]{
 				".#####.#####..#....#", //8
@@ -58,13 +58,13 @@ public class Solution {
 
 		r=19;
 		expected = 5.77311527122319;	
-		test = test(test, grid, r, expected);		 
+		test = test(test, grid, r, expected);		*/ 
 	}
 
 	private static int test(int test, String[] grid, int rabbitCount, double expected)
 			throws Exception {
 		System.out.println("Test"+ (++test));
-		double avg = solve(grid,rabbitCount);
+		double avg = solve2(grid,rabbitCount);
 		for(String line:grid){
 			System.out.println(line);
 		}
@@ -80,6 +80,74 @@ public class Solution {
 		}
 		System.out.println("-----------------");
 		return test;
+	}
+	
+	private static double solve2(String[] grid, int rabbitCount) throws Exception{
+		List<Cell> emptyCells = getEmptyCells(grid);
+		int n = emptyCells.size();
+		if(rabbitCount>emptyCells.size()){
+			throw new Exception("Too many rabbits:" + rabbitCount + 
+					" Not enough empty cells:" + n);
+		}
+		double[][] pascal = createPascalTriangle(n);
+		//double[][] distMat = calcCellDistances(emptyCells);
+		double totalCombos = pascal[n][rabbitCount]; 
+		double result = 0;
+		for(int i=0; i<n; i++){
+			//Cell u = emptyCells.get(i);
+			for(int j=i+1; j<n; j++){
+				//Cell v = emptyCells.get(j);
+				int b = countBad(emptyCells,i,j);
+				result+=pascal[n-2-b][rabbitCount-2]/totalCombos;
+			}
+		}
+		return result;
+	}
+
+	private static int countBad(List<Cell> emptyCells,int i, int j) {
+		int bad=0;
+		Cell u = emptyCells.get(i);
+		Cell v = emptyCells.get(j);
+		double bestDist = calcDistance(u.location, v.location);
+		for(int k=0; k<emptyCells.size();k++){
+			if(k==i || k==j) { continue; }
+			Cell w = emptyCells.get(k);
+			double distU = calcDistance(u.location,w.location);
+			double distV = calcDistance(v.location,w.location);
+			if(distU<bestDist || distV<bestDist){
+				++bad;
+			}
+			else if(distU==bestDist && w.location.y<u.location.y){
+				++bad;
+			}
+			else if(distV==bestDist && w.location.y<v.location.y){
+				++bad;
+			}
+		}
+		return bad;
+	}
+
+	private static double[][] createPascalTriangle(int n) {
+		double[][] pascal = new double[n+1][n+1];
+		
+		for(int i=0; i<=n; i++){
+			for(int k=0; k<=i; k++){
+				if(k==0 || k==i){
+					pascal[i][k] = 1;
+				}
+				else{
+					double left = pascal[i-1][k-1];
+					double right = pascal[i-1][k];
+					pascal[i][k] = left + right;
+				}
+			}
+		}
+		return pascal;
+	}
+
+	private static double[][] calcCellDistances(List<Cell> emptyCells) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private static double solve(String[] grid, int rabbitCount) throws Exception
