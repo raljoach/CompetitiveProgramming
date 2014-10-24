@@ -26,7 +26,7 @@ public class Solution {
 		//1
 		grid = new String[]{
 				"..###.",
-		".###.#"};		 
+				".###.#"};		 
 		r = 4;
 		expected = 1.6;
 		test = test(test, grid, r, expected);
@@ -38,7 +38,7 @@ public class Solution {
 		r=5;		 
 		expected = 2.0;
 		test = test(test, grid, r, expected);
-		
+			
 		//3
 		grid = new String[]{
 				".....",
@@ -47,7 +47,7 @@ public class Solution {
 		r=4;		 
 		expected = 1.253968253968254;
 		test = test(test, grid, r, expected);
-/*
+
 		//4
 		grid = new String[]{
 				".#####.#####..#....#", //8
@@ -58,7 +58,7 @@ public class Solution {
 
 		r=19;
 		expected = 5.77311527122319;	
-		test = test(test, grid, r, expected);		*/ 
+		test = test(test, grid, r, expected);		
 	}
 
 	private static int test(int test, String[] grid, int rabbitCount, double expected)
@@ -82,23 +82,23 @@ public class Solution {
 		return test;
 	}
 	
-	private static double solve2(String[] grid, int rabbitCount) throws Exception{
+	private static double solve2(String[] grid, int r) throws Exception{
 		List<Cell> emptyCells = getEmptyCells(grid);
 		int n = emptyCells.size();
-		if(rabbitCount>emptyCells.size()){
-			throw new Exception("Too many rabbits:" + rabbitCount + 
+		if(r>emptyCells.size()){
+			throw new Exception("Too many rabbits:" + r + 
 					" Not enough empty cells:" + n);
 		}
-		double[][] pascal = createPascalTriangle(n);
+		double[][] C = createPascalTriangle(n);
 		//double[][] distMat = calcCellDistances(emptyCells);
-		double totalCombos = pascal[n][rabbitCount]; 
+		double totalCombos = C[n][r]; 
 		double result = 0;
 		for(int i=0; i<n; i++){
 			//Cell u = emptyCells.get(i);
 			for(int j=i+1; j<n; j++){
 				//Cell v = emptyCells.get(j);
 				int b = countBad(emptyCells,i,j);
-				result+=pascal[n-2-b][rabbitCount-2]/totalCombos;
+				result+=C[n-2-b][r-2]/totalCombos;
 			}
 		}
 		return result;
@@ -117,10 +117,10 @@ public class Solution {
 			if(distU<bestDist || distV<bestDist){
 				++bad;
 			}
-			else if(distU==bestDist && w.location.y<u.location.y){
+			else if(distU==bestDist && k<j){
 				++bad;
 			}
-			else if(distV==bestDist && w.location.y<v.location.y){
+			else if(distV==bestDist && k<i){
 				++bad;
 			}
 		}
@@ -230,15 +230,15 @@ public class Solution {
 			added = true;
 			//result.add(combo);
 			//System.out.println("------------------");
-			System.out.print("Set: ");
+			//System.out.print("Set: ");
 			Cell[] newCombo = new Cell[combo.length];
 			int current = 0;
 			for(Cell cell:combo){
-				System.out.print(cell.label+" ");
+				//System.out.print(cell.label+" ");
 				newCombo[current++]=cell;
 			}
 			result.add(newCombo);
-			System.out.println("\n------------------");
+			//System.out.println("\n------------------");
 		}
 		return added;
 	}
@@ -321,7 +321,10 @@ public class Solution {
 				closestRabbit = thisRabbit;
 			}
 			else if(dist==minDist){
-				if(thisRabbit.location.y < closestRabbit.location.y){
+				if(thisRabbit.location.x < closestRabbit.location.x){
+					closestRabbit = thisRabbit;
+				}
+				else if(thisRabbit.location.x == closestRabbit.location.x && thisRabbit.location.y < closestRabbit.location.y){
 					closestRabbit = thisRabbit;
 				}
 			}
