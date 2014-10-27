@@ -4,11 +4,11 @@ import java.awt.Point;
 
 public class Cell {
 
-	public Point location;
-	public String label;
+    public Point location;
+    public String label;
 
-	public Cell(Point loc, String label) {
-		this.location = loc;
-		this.label = label;
-	}
+    public Cell(Point loc, String label) {
+        this.location = loc;
+        this.label = label;
+    }
 }
