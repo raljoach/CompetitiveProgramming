@@ -215,7 +215,7 @@ public class Answer {
                     }
                 }
                 small[s]++;
-            } while ( next_permutation(per1) );
+            } while ( next_permutation(per1,"per1") );
 
             // large : For each large permutation, find the required s for a
             // matching small permutation and add small[s] to res
@@ -235,10 +235,10 @@ public class Answer {
                 if ( 0 <= ws && ws <= MAX) {
                     res += small[ws];
                 }
-            } while ( next_permutation(per2) );
+            } while ( next_permutation(per2,"per2") );
 
 
-        } while (next_permutation(comb));
+        } while (next_permutation(comb,"comb"));
 
 
         return res;
@@ -314,7 +314,7 @@ public class Answer {
         }
         do {
             permScore1[pid++] = getSortedness(per1);
-        } while ( next_permutation(per1) );
+        } while ( next_permutation(per1,"per1") );
 
         // An issue is that the number of missing elements might be odd, so
         // the number of small and large elements might be different so we might
@@ -327,7 +327,7 @@ public class Answer {
         pid = 0;
         do {
             permScore2[pid++] = getSortedness(per2);
-        } while ( next_permutation(per2) );
+        } while ( next_permutation(per2,"per2") );
 
 
         long res = 0;
@@ -363,7 +363,7 @@ public class Answer {
                     }
                 }
                 small[s]++;
-            } while ( next_permutation(per1) );
+            } while ( next_permutation(per1,"per1") );
 
             // large : For each large permutation, find the required s for a
             // matching small permutation and add small[s] to res
@@ -383,10 +383,10 @@ public class Answer {
                 if ( 0 <= ws && ws <= MAX) {
                     res += small[ws];
                 }
-            } while ( next_permutation(per2) );
+            } while ( next_permutation(per2,"per2") );
 
 
-        } while (next_permutation(comb));
+        } while (next_permutation(comb,"comb"));
 
 
         return res;
@@ -396,9 +396,9 @@ public class Answer {
     //private static int cycle = 0;
     private static Map<int[],Integer> currentHash = new HashMap<int[],Integer>();
     private static Map<int[],Integer> cycleHash = new HashMap<int[],Integer>();
-    private static boolean next_permutation(int[] elems) throws Exception {        
+    private static boolean next_permutation(int[] elems, String name) throws Exception {        
         System.out.println("---------------------");
-        System.out.println("next_compute start:");
+        System.out.println("next_compute start: " + name);
         int cycle = lookupCycle(elems);
         int current = lookupCurrent(elems);
         /*
@@ -442,8 +442,8 @@ public class Answer {
                 System.out.println("Done!");
                 current=-1;
                 
-                setCycleCurrent(elems,cycle,current);
-                System.out.println("end next_compute");
+                removeCycleCurrent(elems);
+                System.out.println("end next_compute: " + name);
                 System.out.println("---------------------");
                 return false;
             }
@@ -451,7 +451,7 @@ public class Answer {
         setCycleCurrent(elems,cycle,current);
         System.out.println("end cycle:" + cycle);
         System.out.println("end current:" + current);
-        System.out.println("end next_compute");
+        System.out.println("end next_compute: " + name);
         System.out.println("---------------------");
         return true;
     }
@@ -459,6 +459,11 @@ public class Answer {
     private static void setCycleCurrent(int[] elems, int cycle, int current) {
         cycleHash.put(elems, cycle);
         currentHash.put(elems, current);
+    }
+    
+    private static void removeCycleCurrent(int[] elems) {
+        cycleHash.remove(elems);
+        currentHash.remove(elems);
     }
 
     private static int lookupCurrent(int[] elems) {
