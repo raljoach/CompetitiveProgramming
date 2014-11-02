@@ -1,5 +1,6 @@
 package topcoder.srm636.Sortish;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,27 +16,27 @@ public class Answer {
          * 1, 2, 5}.
          */
         int test = 0;
-        test = test(test, 5, new int[] { 4, 0, 0, 2, 0 }, 2);
-/*
-        // =========================================================================
-        // 1)
-        test = test(test, 4, new int[] { 0, 0, 0, 0 }, 5);
-        // All 5 possible ways are: {1, 3, 4, 2}, {1, 4, 2, 3}, {2, 1, 4, 3},
-        // {2, 3, 1, 4}, {3, 1, 2, 4}.
+        //test = test(test, 5, new int[] { 4, 0, 0, 2, 0 }, 2);
 
         // =========================================================================
+        // 1)
+        //test = test(test, 4, new int[] { 0, 0, 0, 0 }, 5);
+        // All 5 possible ways are: {1, 3, 4, 2}, {1, 4, 2, 3}, {2, 1, 4, 3},
+        // {2, 3, 1, 4}, {3, 1, 2, 4}.
+        
+        // =========================================================================
         // 2)
-        test = test(test, 2, new int[] { 1, 3, 2 }, 1);
+        //test = test(test, 2, new int[] { 1, 3, 2 }, 1);
 
         // There are no gaps and sortedness is indeed equal to 2.
 
         // =========================================================================
         // 3)
-        test = test(test, 3, new int[] { 0, 0, 2, 0, 0, 0 }, 4);
+        //test = test(test, 3, new int[] { 0, 0, 2, 0, 0, 0 }, 4);
 
         // =========================================================================
         // 4)
-        test = test(test, 87, new int[] { 2, 0 }, 0);
+        //test = test(test, 87, new int[] { 2, 0 }, 0);
 
         // The only permutation that matches seq is {2, 1}. However, the
         // sortedness of this sequence is 0, not 87.
@@ -43,7 +44,7 @@ public class Answer {
         // =========================================================================
         // 5)
         test = test(test, 30, new int[] { 0, 6, 3, 0, 0, 2, 10, 0, 0, 0 }, 34);
-
+/*
         // =========================================================================
         // 6)
 
@@ -250,6 +251,8 @@ public class Answer {
         List<Integer> blank = new ArrayList<Integer>();
         List<Integer> missing = new ArrayList<Integer>();
         int n = seq.length;
+        int maxSortedness = ((n-1)*n)/2;
+        if(sortedness>maxSortedness){return 0;}
         for (int i = 0; i < n; i++) {
             if (seq[i] == 0) {
                 blank.add(i);
@@ -276,8 +279,10 @@ public class Answer {
                 }
             }
         }
+        
         // calculate the sortedness added by choosing a number in each of the blank places
         int m = blank.size();
+        if(m<=1){return 1;}
         int[][] addSort = new int[m][m];
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < m; j++) {
@@ -340,7 +345,12 @@ public class Answer {
         for (int j = m/2; j < m; j++) {
             comb[j] = 1;
         }
+        int comboNum = 0;
+        Map<String,Boolean> seen = new HashMap<String,Boolean>();
         do {
+            System.out.println("------------------------");
+            System.out.print("Combo: ");
+            print(comb);
             int MAX = 1999*7; //The maximum value of s. Roughly you can
             // imagine that for each of the m/2 small numbers we might add less
             // than n-1 sortedness. The real limit is smaller but is not needed
@@ -354,12 +364,15 @@ public class Answer {
             for (int i = 0; i < m / 2; i++) {
                 per1[i] = i;
             }
+            String str = "";
             do {
                 int s = permScore1[pid++];
                 int j = 0;
                 for (int i = 0; i < m; i++) {
                     if (comb[i] == 0) {
-                        s += addSort[i][ per1[j++] ];
+                        int missingIndex = per1[j++];
+                        seq[blank.get(i)] = missing.get(missingIndex);                        
+                        s += addSort[i][ missingIndex ];
                     }
                 }
                 small[s]++;
@@ -374,18 +387,34 @@ public class Answer {
             do {
                 int s = permScore2[pid++];
                 int j = 0;
+                
                 for (int i = 0; i < m; i++) {
                     if (comb[i] == 1) {
-                        s += addSort[i][ per2[j++] + (m/2) ];
+                        int missingIndex = per2[j++] + (m/2);
+                        seq[blank.get(i)] = missing.get(missingIndex);
+                        s += addSort[i][ missingIndex ];
                     }
                 }
+                for(int v:seq){
+                    str+=v;
+                }
+                if(seen.containsKey(str)){
+                    continue;
+                }
+                else{
+                    seen.put(str, true);
+                }
                 int ws = sortedness - initialSortedness - s - combsort;
+                
                 if ( 0 <= ws && ws <= MAX) {
                     res += small[ws];
                 }
+                System.out.print("seq: ");
+                print(seq);
+                System.out.println("combo["+comboNum+"]: remaining="+ws + " res:"+res);
+                ++comboNum;
             } while ( next_permutation(per2,"per2") );
-
-
+            
         } while (next_permutation(comb,"comb"));
 
 
@@ -397,29 +426,35 @@ public class Answer {
     private static Map<int[],Integer> currentHash = new HashMap<int[],Integer>();
     private static Map<int[],Integer> cycleHash = new HashMap<int[],Integer>();
     private static boolean next_permutation(int[] elems, String name) throws Exception {        
-        System.out.println("---------------------");
-        System.out.println("next_compute start: " + name);
+        //System.out.println("---------------------");
+        //System.out.println("next_compute start: " + name);
         int cycle = lookupCycle(elems);
         int current = lookupCurrent(elems);
-        /*
-        if(current==-1){
-            cycle=elems.length-1;
-            current = elems.length-1;  
-            System.out.println("New array to permute");
-            print(elems);
-        }*/
         
-        System.out.println("start cycle:" + cycle);
-        System.out.println("start current:" + current);
+        if(cycle==0){
+            if(current<=1){  
+                //System.out.println("Part A");
+                //System.out.println("Done!");
+                current=-1;
+                
+                removeCycleCurrent(elems);
+                //System.out.println("end next_compute: " + name);
+                //System.out.println("---------------------");
+                return false;
+            }
+        }
+        
+        //System.out.println("start cycle:" + cycle);
+        //System.out.println("start current:" + current);
         
         if(cycle>0){
             if(current>=1){
-                System.out.println("Part D");
+                //System.out.println("Part D");
                 swap(elems,current-1,current);
                 --current;
                 
                 if(current==0){
-                    System.out.println("Part C");
+                    //System.out.println("Part C");
                     --cycle;
                     current = elems.length-1;
                 }
@@ -427,7 +462,7 @@ public class Answer {
         }
         else{
             if(current>1){
-                System.out.println("Part B");
+                //System.out.println("Part B");
                 swap(elems,current-1,current);
                 --current;
             }
@@ -436,23 +471,12 @@ public class Answer {
 //            }
         }
         
-        if(cycle==0){
-            if(current<=1){  
-                System.out.println("Part A");
-                System.out.println("Done!");
-                current=-1;
-                
-                removeCycleCurrent(elems);
-                System.out.println("end next_compute: " + name);
-                System.out.println("---------------------");
-                return false;
-            }
-        }
+        
         setCycleCurrent(elems,cycle,current);
-        System.out.println("end cycle:" + cycle);
-        System.out.println("end current:" + current);
-        System.out.println("end next_compute: " + name);
-        System.out.println("---------------------");
+        //System.out.println("end cycle:" + cycle);
+        //System.out.println("end current:" + current);
+        //System.out.println("end next_compute: " + name);
+        //System.out.println("---------------------");
         return true;
     }
         
@@ -469,14 +493,14 @@ public class Answer {
     private static int lookupCurrent(int[] elems) {
         if(!currentHash.containsKey(elems)){
             int current = elems.length-1;  
-            System.out.println("New array to permute");
-            print(elems);
+            //System.out.println("New array to permute");
+            //print(elems);
             currentHash.put(elems,current);
             return current;
         }
         else{
-            System.out.println("Existing array to permute");
-            print(elems);
+            //System.out.println("Existing array to permute");
+            //print(elems);
             return currentHash.get(elems);
         }
     }
@@ -494,14 +518,14 @@ public class Answer {
     }
 
     private static void swap(int[] elems, int i, int j) {               
-        System.out.println("Swapping indices: " + i + ", " + j);
-        System.out.println("Original:");
-        print(elems);
+        //System.out.println("Swapping indices: " + i + ", " + j);
+        //System.out.println("Original:");
+        //print(elems);
         int tmp = elems[i];
         elems[i] = elems[j];
         elems[j] = tmp;   
-        System.out.println("Afer Swap:");
-        print(elems);
+        //System.out.println("Afer Swap:");
+        //print(elems);
     }
 
     private static void print(int[] elems) {
