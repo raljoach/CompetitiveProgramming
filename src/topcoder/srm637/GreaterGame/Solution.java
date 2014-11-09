@@ -67,6 +67,12 @@ public class Solution {
         // 4)
         // test = test(test, new int[] { 6, 12, 17, 14, 20, 8, 16, 7, 2, 15 },
         // new int[] { -1, -1, 4, -1, 11, 3, 13, -1, -1, 18 }, 8.0);
+        
+        //NOTE: I haven't solved this on paper yet, expected answer 1.5 is not correct
+        test = test(test, new int[]{1,2,4}, new int[]{-1,-1,6}, 1.5);
+        
+        //NOTE: I haven't solved this on paper yet, expected answer 1.5 is not correct
+        test = test(test, new int[]{1,2,4}, new int[]{5,-1,6}, 1.5);
     }
 
     private static int test(int test, int[] snuke, int[] sothe, double expected) {
@@ -86,7 +92,7 @@ public class Solution {
         return test;
     }
     
-    private static double solve2(int[] snukeCards, int[] sotheCards) {
+    private static double solve2(int[] snukeCards, int[] sotheCards) throws Exception {
         int n = snukeCards.length;
         int max = 2 * n;
 
@@ -192,6 +198,8 @@ public class Solution {
             }
         }
 
+        return 0;
+        /*
         double total = 0;
         double ways = 0;
         int bestScore = Integer.MIN_VALUE;
@@ -239,6 +247,7 @@ public class Solution {
         } else {
             return bestScore;
         }
+        */
     }
 
     private static int findNextBiggest(Map<Integer, Boolean> snukeHash,
