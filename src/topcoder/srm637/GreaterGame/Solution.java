@@ -85,7 +85,7 @@ public class Solution {
 
     private static int test(int test, int[] snuke, int[] sothe, double expected)
             throws Exception {
-        System.out.println("Test" + (test++));
+        System.out.println("Test" + (++test));
         System.out.println("snuke: " + print(snuke));
         System.out.println("sothe: " + print(sothe));
         System.out.println("Expected:" + expected);

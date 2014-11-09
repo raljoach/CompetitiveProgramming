@@ -16,35 +16,35 @@ public class Answer {
          * 1, 2, 5}.
          */
         int test = 0;
-        //test = test(test, 5, new int[] { 4, 0, 0, 2, 0 }, 2);
+        test = test(test, 5, new int[] { 4, 0, 0, 2, 0 }, 2);
 
         // =========================================================================
         // 1)
-        //test = test(test, 4, new int[] { 0, 0, 0, 0 }, 5);
+        test = test(test, 4, new int[] { 0, 0, 0, 0 }, 5);
         // All 5 possible ways are: {1, 3, 4, 2}, {1, 4, 2, 3}, {2, 1, 4, 3},
         // {2, 3, 1, 4}, {3, 1, 2, 4}.
 
         // =========================================================================
         // 2)
-        //test = test(test, 2, new int[] { 1, 3, 2 }, 1);
+        test = test(test, 2, new int[] { 1, 3, 2 }, 1);
 
         // There are no gaps and sortedness is indeed equal to 2.
 
         // =========================================================================
         // 3)
-        //test = test(test, 3, new int[] { 0, 0, 2, 0, 0, 0 }, 4);
+        test = test(test, 3, new int[] { 0, 0, 2, 0, 0, 0 }, 4);
 
         // =========================================================================
         // 4)
-        //test = test(test, 87, new int[] { 2, 0 }, 0);
+        test = test(test, 87, new int[] { 2, 0 }, 0);
 
         // The only permutation that matches seq is {2, 1}. However, the
         // sortedness of this sequence is 0, not 87.
 
         // =========================================================================
         // 5)
-        //est = test(test, 30, new int[] { 0, 6, 3, 0, 0, 2, 10, 0, 0, 0 },
-        //34);
+        test = test(test, 30, new int[] { 0, 6, 3, 0, 0, 2, 10, 0, 0, 0 },
+        34);
 
         // =========================================================================
         // 6)
@@ -56,7 +56,7 @@ public class Answer {
 
     private static int test(int test, int sortedness, int[] seq, long expected)
             throws Exception {
-        System.out.println("Test" + (test++));
+        System.out.println("Test" + (++test));
         long actual = ways(sortedness, seq);
         System.out.println("sortedness: " + sortedness);
         System.out.println("seq: ");
