@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class Solution {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         // 0)
         /*
@@ -33,7 +33,7 @@ public class Solution {
          */
 
         int test = 0;
-        // test = test(test, new int[] { 4, 2 }, new int[] { -1, -1 }, 1.5);
+        test = test(test, new int[] { 4, 2 }, new int[] { -1, -1 }, 1.5);
 
         /*
          * Sothe will play the cards 1 and 3 in some unknown order. The best
@@ -45,37 +45,38 @@ public class Solution {
          * Sothe's 3, and his 4 against Sothe's 1. In this case, Snuke scores 1
          * point. Therefore, the expected number of Snuke's points is 1.5.
          */
-        //===========================================================
+        // ===========================================================
         // 1)
-        //test = test(test, new int[] { 4, 2 }, new int[] { 1, 3 }, 2.0);
+        // test = test(test, new int[] { 4, 2 }, new int[] { 1, 3 }, 2.0);
 
         // If Snuke plays card 2 first and card 4 next, he is guaranteed to
         // score 2 points.
- 
-        //===========================================================
+
+        // ===========================================================
         // 2)
-        //test = test(test, new int[] { 2 }, new int[] { -1 }, 1.0);
+        // test = test(test, new int[] { 2 }, new int[] { -1 }, 1.0);
         // Sothe's only card has to be 1, and thus Snuke is guaranteed to win
         // the only turn of this game.
 
-        //===========================================================
+        // ===========================================================
         // 3)
-        test = test(test, new int[] { 1, 3, 5, 7 }, new int[] { 8, -1, 4, -1
-         },
-         2.5);
+        //test = test(test, new int[] { 1, 3, 5, 7 }, new int[] { 8, -1, 4, -1 },
+        //        2.5);
 
         // 4)
         // test = test(test, new int[] { 6, 12, 17, 14, 20, 8, 16, 7, 2, 15 },
         // new int[] { -1, -1, 4, -1, 11, 3, 13, -1, -1, 18 }, 8.0);
-        
-        //NOTE: I haven't solved this on paper yet, expected answer 1.5 is not correct
-        test = test(test, new int[]{1,2,4}, new int[]{-1,-1,6}, 1.5);
-        
-        //NOTE: I haven't solved this on paper yet, expected answer 1.5 is not correct
-        test = test(test, new int[]{1,2,4}, new int[]{5,-1,6}, 1.5);
+
+        // NOTE: I haven't solved this on paper yet, expected answer 1.5 is not
+        // correct
+        //test = test(test, new int[] { 1, 2, 4 }, new int[] { -1, -1, 6 }, 1.5);
+
+        // NOTE: I haven't solved this on paper yet, expected answer 1.5 is not
+        // correct
+        //test = test(test, new int[] { 1, 2, 4 }, new int[] { 5, -1, 6 }, 1.5);
     }
 
-    private static int test(int test, int[] snuke, int[] sothe, double expected) {
+    private static int test(int test, int[] snuke, int[] sothe, double expected) throws Exception {
         System.out.println("Test" + (test++));
         System.out.println("snuke: " + print(snuke));
         System.out.println("sothe: " + print(sothe));
@@ -91,163 +92,170 @@ public class Solution {
         System.out.println("-----------------");
         return test;
     }
-    
-    private static double solve2(int[] snukeCards, int[] sotheCards) throws Exception {
+
+    private static double solve(int[] snukeCards, int[] sotheHand)
+            throws Exception {
         int n = snukeCards.length;
         int max = 2 * n;
 
-        /* SnukeHash and SotheHash are needed so we know what cards out of the 2N
-         *  are missing and are in Sothe's hands
+        /*
+         * SnukeHash and SotheHash are needed so we know what cards out of the
+         * 2N are missing and are in Sothe's hands
          */
         Map<Integer, Boolean> snukeHash = new HashMap<Integer, Boolean>();
         Map<Integer, Boolean> sotheHash = new HashMap<Integer, Boolean>();
         List<Integer> dontKnowSothe = new ArrayList<Integer>();
         List<Integer> dontKnowSnuke = new ArrayList<Integer>();
-        
-        /* Keep track of cards that Sothe will play each round
-         * 
+        List<Integer> sotheRandomCards = new ArrayList<Integer>();
+        List<Integer> snukeRandomCards = new ArrayList<Integer>();
+        int[] snukeHand = new int[n];
+
+        /*
+         * Keep track of cards that Sothe will play each round
          */
         int snukeMin = Integer.MAX_VALUE;
         for (int i = 0; i < n; i++) {
             snukeMin = Math.min(snukeMin, snukeCards[i]);
             snukeHash.put(snukeCards[i], true);
-            if (sotheCards[i] == -1) {
-                dontKnowSothe.add(i);                
-            }
-            else{
-                sotheHash.put(sotheCards[i], true);
+            if (sotheHand[i] == -1) {
+                dontKnowSothe.add(i);
+            } else {
+                sotheHash.put(sotheHand[i], true);
             }
         }
 
-        /* We know all the cards Sothe has, but the cards that we
-         * don't know what round he will play them on, we store in a separate list
+        /*
+         * We know all the cards Sothe has, but the cards that we don't know
+         * what round he will play them on, we store in a separate list
          */
-        List<Integer> sotheCardsShuffle = new ArrayList<Integer>();
+
         for (int j = 1; j <= max; j++) {
             if (!sotheHash.containsKey(j) && !snukeHash.containsKey(j)) {
-                sotheCardsShuffle.add(j);
+                sotheRandomCards.add(j);
             }
         }
-        
-        /* Strategy:
-         * If Sothe plays the max card, Snuke has to play his min card
-         * For each card that we know Sothe is going to play and when
-         *   we find the smallest card in Snuke's hand to beat that card
-         *   and place it in that slot permanently
-         * For other cards that Sothe has
-         *   we find the smallest card to beat his card
-         *   but because we don't know what order he is going to play those cards
-         *   we need to
-         *      > create an array with these numbers in sorted order (Sothe's leftover cards)
-         *      > we copy these values into the -1 slots of Sothe's hand
-         *      > we compute score of Snuke's hand vs Sothe's hand
-         *      > we permute Sothe's leftover cards and repeat
+
+        /*
+         * Strategy: If Sothe plays the max card, Snuke has to play his min card
+         * For each card that we know Sothe is going to play and when we find
+         * the smallest card in Snuke's hand to beat that card and place it in
+         * that slot permanently For other cards that Sothe has we find the
+         * smallest card to beat his card but because we don't know what order
+         * he is going to play those cards we need to > create an array with
+         * these numbers in sorted order (Sothe's leftover cards) > we copy
+         * these values into the -1 slots of Sothe's hand > we compute score of
+         * Snuke's hand vs Sothe's hand > we permute Sothe's leftover cards and
+         * repeat
          */
-        
-        int[] snukeHand = new int[n];
-        for(int j=0; j<sotheCards.length; j++){
-            int sotheCard = sotheCards[j];
-            if(sotheCard==-1){
+
+        for (int j = 0; j < sotheHand.length; j++) {
+            int sotheCard = sotheHand[j];
+            if (sotheCard == -1) {
                 snukeHand[j] = -1;
-            }
-            else {
-                if(sotheCard==max){
-                    snukeHand[j] = snukeMin; //Snuke knows he has to play this card on this turn
+            } else {
+                if (sotheCard == max) {
+                    snukeHand[j] = snukeMin; // Snuke knows he has to play this
+                                             // card on this turn
                     snukeHash.remove(snukeMin);
-                }
-                else{
-                    int card = findNextBiggest(snukeHash,sotheCard); 
-                    if(card>0){
-                        snukeHand[j] = card; //Snuke knows he has to play this coard on this turn
-                    }
-                    else{
-                        snukeHand[j] = -1; //Snuke doesn't know what card to play on this turn
+                } else {
+                    int card = findNextBiggest(snukeHash, sotheCard);
+                    if (card > 0) { // snuke has a card just bigger than sothe's
+                                    // card played at that turn
+                        snukeHand[j] = card; // Snuke knows he has to play this
+                                             // coard on this turn
+                    } else { // snuke doesn't have a card, so we play a random
+                             // card
+                        snukeHand[j] = -1; // Snuke doesn't know what card to
+                                           // play on this turn
                         dontKnowSnuke.add(j);
                     }
                 }
             }
         }
-        
-        //Whatever is remaining in the hash is what Snuke
-        //doesn't know how to play
-        List<Integer> snukeCardsShuffle = new ArrayList<Integer>(); 
-        for(int card:snukeHash.keySet()){
-            insertSort(snukeCardsShuffle,card);
-        }
-        snukeHash.clear(); //we put Snuke's remaining cards into snukeOtherCards for Shuffling
-        
-        
+
         // We could look at sothe's other cards that has left over
         // and say, hey looks pick Snuke cards that would beat his
         // and take our chances permuting them
-        for(int k=0; k<sotheCardsShuffle.size(); k++){
-            int sotheCard = sotheCardsShuffle.get(k);
-            if(sotheCard==max){ //if we encounter max, snuke has to play his min card
-                insertSort(snukeCardsShuffle,snukeMin);
+        for (int k = 0; k < sotheRandomCards.size(); k++) {
+            int sotheCard = sotheRandomCards.get(k);
+            if (sotheCard == max) { // if we encounter max, snuke has to play
+                                    // his min card
+                insertSort(snukeRandomCards, snukeMin);
                 snukeHash.remove(snukeMin);
-            }
-            else{
-                int card = findNextBiggest(snukeHash,sotheCard);
-                if(card>0){ //if we find a card that's just big enough
-                    insertSort(snukeCardsShuffle,card);
-                }
-                else{
-                    //snukeHand[j] = -1;
-                    throw new Exception("I don't know what to do here!");
+            } else {
+                int card = findNextBiggest(snukeHash, sotheCard);
+                if (card > 0) { // if we find a card that's just big enough, we
+                                // have to play it
+                    insertSort(snukeRandomCards, card);
+                } else { // if we don't find a card big enough, then we just
+                         // randomly pick from snuke's shuffle cards
+                         // snukeHand[j] = -1;
+                         // throw new
+                         // Exception("I don't know what to do here!");
                 }
             }
         }
 
-        return 0;
+        // Whatever is remaining in the hash is what Snuke
+        // doesn't know how to play
+
+        for (int card : snukeHash.keySet()) {
+            insertSort(snukeRandomCards, card);
+        }
+        snukeHash.clear(); // we put Snuke's remaining cards into
+                           // snukeOtherCards for Shuffling
+
         /*
+         * Sanity check: Make sure dontKnow arrays match in count with
+         * randomCard arrays
+         */
+
+        if (dontKnowSothe.size() != sotheRandomCards.size()) {
+            throw new Exception(
+                    "Error: dontKnowSothe.size!=sotheRandomCards.size");
+        }
+        if (dontKnowSnuke.size() != snukeRandomCards.size()) {
+            throw new Exception(
+                    "Error: dontKnowSnuke.size!=snukeRandomCards.size");
+        }
+        if (snukeRandomCards.size() != sotheRandomCards.size()) {
+            throw new Exception(
+                    "Error: snukeRandomCards.size!=sotheRandomCards.size");
+        }
+
+        // Now we need to do for each shuffle of Sothe random cards
+        // compare them to Snuke's hand
+        // so we
+        // 1) Use dontKnowSothe to place the random cards in the appropriate
+        // slots in sotheHand
+        // 2) Use dontKnowSnuke to place the random cards in the appropriate
+        // slots in snukeHand
+        // 3) Compute score
+        //
         double total = 0;
         double ways = 0;
-        int bestScore = Integer.MIN_VALUE;
-        // do {
-
-        List<Integer> sotheCopy = new ArrayList<Integer>();
-        int m = 0;
-        for (int turn = 0; turn < sothe.length; turn++) {
-            int plays = sothe[turn];
-            if (plays != -1) {
-                sotheCopy.add(sothe[turn]);
-            } else {
-                sotheCopy.add(sotheCardsShuffle.get(m++));
-            }
-        }
-
-        List<Integer> snukeCopy = new ArrayList<Integer>();
-        for (int p = 0; p < snuke.length; p++) {
-            int val = snukeCards[p];
-            insertSort(snukeCopy, val);
-        }
+        placeCards(dontKnowSothe, sotheRandomCards, sotheHand);
         do {
-
-            int score = 0;            
+            placeCards(dontKnowSnuke, snukeRandomCards, snukeHand);
+            int score = 0;
             for (int t = 0; t < n; t++) {
-                if (snukeCopy.get(t) > sotheCopy.get(t)) {
+                if (snukeHand[t] > snukeHand[t]) {
                     ++score;
                 }
             }
 
-            if (sotheCardsShuffle.size() > 0) {
-                total += score;
-                ++ways;
-            } else {
-                if(score>bestScore){
-                    bestScore = score;
-                }
-            }
+            total += score;
+            ++ways;
 
-        } while (next_permutation(snukeCopy, max));
+        } while (next_permutation(snukeRandomCards, max));
 
-        // } while (next_permutation(sotheOtherCards, max));
-        if (sotheCardsShuffle.size() > 0) {
-            return total / ways;
-        } else {
-            return bestScore;
-        }
-        */
+        return total / ways;
+    }
+
+    private static void placeCards(List<Integer> dontKnowSothe,
+            List<Integer> sotheRandomCards, int[] sotheHand) {
+        // TODO Auto-generated method stub
+
     }
 
     private static int findNextBiggest(Map<Integer, Boolean> snukeHash,
@@ -256,7 +264,7 @@ public class Solution {
         return 0;
     }
 
-    private static void insertSort(List<Integer> list, int newVal) {        
+    private static void insertSort(List<Integer> list, int newVal) {
         if (list.size() == 0) {
             list.add(newVal);
         } else {
@@ -271,16 +279,17 @@ public class Solution {
         }
     }
 
-    private static double solve(int[] snuke, int[] sothe) {
+    
+    private static double solveOld(int[] snuke, int[] sothe) {
         int n = snuke.length;
         int max = 2 * n;
 
         Map<Integer, Boolean> snukeHash = new HashMap<Integer, Boolean>();
         Map<Integer, Boolean> sotheHash = new HashMap<Integer, Boolean>();
         // List<Integer> dontKnow = new ArrayList<Integer>();
-        
-        /* Keep track of cards that Sothe will play each round
-         * 
+
+        /*
+         * Keep track of cards that Sothe will play each round
          */
         for (int i = 0; i < n; i++) {
             snukeHash.put(snuke[i], true);
@@ -292,8 +301,9 @@ public class Solution {
             // }
         }
 
-        /* We know all the cards Sothe has, but the cards that we
-         * don't know what round he will play them on, we store in a separate list
+        /*
+         * We know all the cards Sothe has, but the cards that we don't know
+         * what round he will play them on, we store in a separate list
          */
         List<Integer> sotheOtherCards = new ArrayList<Integer>();
         for (int j = 1; j <= max; j++) {
@@ -301,20 +311,18 @@ public class Solution {
                 sotheOtherCards.add(j);
             }
         }
-        
-        /* Strategy:
-         * If Sothe plays the max card, Snuke has to play his min card
-         * For each card that we know Sothe is going to play and when
-         *   we find the smallest card in Snuke's hand to beat that card
-         *   and place it in that slot permanently
-         * For other cards that Sothe has
-         *   we find the smallest card to beat his card
-         *   but because we don't know what order he is going to play those cards
-         *   we need to
-         *      > create an array with these numbers in sorted order (Sothe's leftover cards)
-         *      > we copy these values into the -1 slots of Sothe's hand
-         *      > we compute score of Snuke's hand vs Sothe's hand
-         *      > we permute Sothe's leftover cards and repeat
+
+        /*
+         * Strategy: If Sothe plays the max card, Snuke has to play his min card
+         * For each card that we know Sothe is going to play and when we find
+         * the smallest card in Snuke's hand to beat that card and place it in
+         * that slot permanently For other cards that Sothe has we find the
+         * smallest card to beat his card but because we don't know what order
+         * he is going to play those cards we need to > create an array with
+         * these numbers in sorted order (Sothe's leftover cards) > we copy
+         * these values into the -1 slots of Sothe's hand > we compute score of
+         * Snuke's hand vs Sothe's hand > we permute Sothe's leftover cards and
+         * repeat
          */
 
         double total = 0;
@@ -353,7 +361,7 @@ public class Solution {
         }
         do {
 
-            int score = 0;            
+            int score = 0;
             for (int t = 0; t < n; t++) {
                 if (snukeCopy.get(t) > sotheCopy.get(t)) {
                     ++score;
@@ -364,7 +372,7 @@ public class Solution {
                 total += score;
                 ++ways;
             } else {
-                if(score>bestScore){
+                if (score > bestScore) {
                     bestScore = score;
                 }
             }
@@ -382,22 +390,22 @@ public class Solution {
     private static boolean next_permutation(List<Integer> input, int max) {
         int n = input.size();
 
-        //if (input.get(0) == max) {
-            boolean lastPerm = true;
-            int prev = input.get(0);
-            for (int j = 1; j < n; j++) {
-                int v = input.get(j);
-                if (v > prev) {
-                    lastPerm = false;
-                    break;
-                }
-                prev = v;
+        // if (input.get(0) == max) {
+        boolean lastPerm = true;
+        int prev = input.get(0);
+        for (int j = 1; j < n; j++) {
+            int v = input.get(j);
+            if (v > prev) {
+                lastPerm = false;
+                break;
             }
+            prev = v;
+        }
 
-            if (lastPerm) {
-                return false;
-            }
-        //}
+        if (lastPerm) {
+            return false;
+        }
+        // }
 
         Map<Integer, Integer> fixed = new HashMap<Integer, Integer>();
         for (int i = 0; i < n; i++) {
