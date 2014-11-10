@@ -56,7 +56,7 @@ public class Answer {
 
     private static int test(int test, int sortedness, int[] seq, long expected)
             throws Exception {
-        System.out.println("Test" + (++test));
+        System.out.println("Test" + (test++));
         long actual = ways(sortedness, seq);
         System.out.println("sortedness: " + sortedness);
         System.out.println("seq: ");

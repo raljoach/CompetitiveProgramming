@@ -30,7 +30,7 @@ public class Solution {
     }
 
     private static int test(int test, int[] input, List<List<Integer>> expected) {
-        System.out.println("Test" + (++test));
+        System.out.println("Test" + (test++));
         System.out.println("input: " + print(input));
 
         int n = expected.size();

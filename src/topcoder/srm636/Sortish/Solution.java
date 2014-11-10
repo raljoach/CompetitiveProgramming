@@ -64,7 +64,7 @@ public class Solution {
     }
 
     private static int test(int test, int sortedness, int[] seq, int expected) {
-        System.out.println("Test" + (++test));
+        System.out.println("Test" + (test++));
         int actual = solve(sortedness, seq);
         System.out.println("sortedness: " + sortedness);
         System.out.println("seq: ");

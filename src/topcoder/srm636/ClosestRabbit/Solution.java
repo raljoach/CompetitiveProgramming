@@ -54,7 +54,7 @@ public class Solution {
 
     private static int test(int test, String[] grid, int rabbitCount,
             double expected) throws Exception {
-        System.out.println("Test" + (++test));
+        System.out.println("Test" + (test++));
         double avg = solve2(grid, rabbitCount);
         for (String line : grid) {
             System.out.println(line);
