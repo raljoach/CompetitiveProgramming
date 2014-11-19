@@ -9,8 +9,10 @@ public class Door {
     public int turns = 0;
     public Cell center;
     public DoorState state;
+    private String[] grid;
 
-    public Door(Cell center, DoorState state) {
+    public Door(String[] grid, Cell center, DoorState state) {
+        this.grid = grid;
         this.center = center;
         this.state = state;
         this.nearbyCells = getNearbyCells();
@@ -24,7 +26,7 @@ public class Door {
             throws Exception {
         char val = grid[row].charAt(column);
         DoorState state = getState(grid, row, column);
-        Door door = new Door(new Cell(row, column, val), state);
+        Door door = new Door(grid,new Cell(row, column, val), state);
         return door;
     }
 
@@ -126,7 +128,7 @@ public class Door {
     }
 
     public Door clone() {
-        Door clone = new Door(this.center, this.state);
+        Door clone = new Door(this.grid, this.center, this.state);
         clone.turns = this.turns;
         return clone;
     }
@@ -182,10 +184,16 @@ public class Door {
         if(this.state == DoorState.Horizontal)
         {
             //Upper middle
-            /*map.put(new Cell(prevRow,c,'9').getId(),' ');
+            if(grid[prevRow].charAt(c)=='|')
+            {
+                map.put(new Cell(prevRow,c,'9').getId(),' ');
+            }
             
             //Lower middle
-            map.put(new Cell(nextRow,c,'9').getId(),' ');*/
+            if(grid[nextRow].charAt(c)=='|')
+            {
+                map.put(new Cell(nextRow,c,'9').getId(),' ');
+            }
             
             //Left middle
             map.put(new Cell(r,prevCol,'9').getId(),'-');
@@ -202,10 +210,14 @@ public class Door {
             map.put(new Cell(nextRow,c,'9').getId(),'|');
             
             //Left middle
-            /*map.put(new Cell(r,prevCol,'9').getId(),' ');
-            
+            if(grid[r].charAt(prevCol)=='-')
+            {
+                map.put(new Cell(r,prevCol,'9').getId(),' ');
+            }
             //Right middle
-            map.put(new Cell(r,nextCol,'9').getId(),' ');*/
+            if(grid[r].charAt(nextCol)=='-'){
+                map.put(new Cell(r,nextCol,'9').getId(),' ');
+            }
         }
         return map;
     }

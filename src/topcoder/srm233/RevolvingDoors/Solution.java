@@ -9,16 +9,16 @@ public class Solution {
 
     public static void main(String[] args) throws Exception {
         // 0)
-        int test = 0;/*
+        int test = 0;
         test = test(test, new String[] { "    ### ", "    #E# ", "   ## # ",
                 "####  ##", "# S -O-#", "# ###  #", "#      #", "########" }, 2);
         // This is the example from the problem statement.
-
+        
         // 1)
 
         test = test(test, new String[] { "#### ", "#S|##", "# O #", "##|E#",
                 " ####" }, -1);
-
+        
         // There is no way to reach the end square.
 
         // 2)
@@ -30,7 +30,7 @@ public class Solution {
         // 6th, 7th, 8th, and 9th doors once each (counting from the left). Note
         // that the 'S' and 'E' do not block doors, and in fact you must turn
         // the 3rd door twice to end up on the 'E'.
-         
+        
 
         // 3)
 
@@ -38,13 +38,14 @@ public class Solution {
                 "#  S | E  #", "#    O    #", "#    |    #", "#         #",
                 "###########" }, 0);
 
+
         // 4)
 
         test = test(test, new String[] { "        E", "    |    ", "    O    ",
                 "    |    ", " -O-S-O- ", "    |    ", "    O    ",
                 "    |    ", "         " }, -1);
-*/                
-       
+               
+   
         // You are stuck, unable to move or turn any doors from this position.
 
         // 5)
@@ -52,7 +53,7 @@ public class Solution {
         test = test(test, new String[] { "##E#   ", "#  ##  ", " -O-## ",
                 " #  ## ", " ##  ##", "  -O-  ", "##  ## ", " # ### ",
                 " #  S  " }, 5);
-        /*
+         
         // 6)
 
         test = test(test, new String[] { "#############", "#  #|##|#   #",
@@ -67,7 +68,7 @@ public class Solution {
         // # -O--O- #
         // # # ## # #
         // #############
-*/
+
     }
 
     private static int test(int test, String[] input, int expected)
@@ -76,7 +77,7 @@ public class Solution {
         System.out.println("input: " + print(input));
         System.out.println("Expected: " + expected);
         int actual = solve(input);
-        System.out.println("Actual:" + actual);
+        System.out.println("Actual: " + actual);
         if (expected == actual) {
             System.out.println("PASSED");
         } else {
@@ -104,20 +105,21 @@ public class Solution {
             Cell next = q.remove(0);
 
             boolean isStuck = true;
-            while (isStuck && getNumberOfDoorTurns(next)<ans) {
-                print(next);
+            //String path = print(next);
+            while (isStuck && getNumberOfDoorTurns(next)<ans) {                
                 int hasNeighbors = 0;
                 List<Cell> neighborList = findSuccessors(input, next);
                 for (Cell neighbor : neighborList) {
-                    System.out.print("Neighbor: " + neighbor.getId());
+                    //System.out.print("Neighbor: " + neighbor.getId());
                     hasNeighbors++;
                     if (!next.visited.containsKey(neighbor.getId())) {
-                        System.out.println("(Unvisited)");
+                        //System.out.println("(Unvisited)");
                         isStuck = false;
                         if (checkFound(neighbor, end)) {
                             int thisAns = getNumberOfDoorTurns(neighbor);
+                            //System.out.println("Answer: " + thisAns);
                             if(thisAns<ans)
-                            {
+                            {                                
                                 ans = thisAns;
                             }
                         }
@@ -126,11 +128,11 @@ public class Solution {
                             q.add(neighbor);
                         }
                     } else {
-                        System.out.println(" (Visited)");
+                        //System.out.println(" (Visited)");
                     }
 
                 }
-                System.out.println("----------------------------------");
+                //System.out.println("----------------------------------");
                 if (isStuck) {
                     if (hasNeighbors == 1) {
                         if(bounceBack.containsKey(next.getId()))
@@ -141,9 +143,9 @@ public class Solution {
                         {
                             bounceBack.put(next.getId(),true);
                         }
-                        System.out.println("next: "
-                                        + next.getId()
-                                        + " is stuck. Unstuck this guy by clearing his visited cache!");
+//                        System.out.println("next: "
+//                                        + next.getId()
+//                                        + " is stuck. Unstuck this guy by clearing his visited cache!");
                         next.visited.clear();
                     } else {
                         break;
@@ -157,25 +159,28 @@ public class Solution {
         return -1;
     }
 
-    private static void print(Cell next) {
+    private static String print(Cell next) {
         System.out.print("Next: ");
         System.out.println(next.getId());
         System.out.println("Path:");
-        boolean first = true;
+        String path = "None";
         if (next.path.size() == 0) {
-            System.out.println("None");
+            System.out.println(path);
         } else {
+            boolean first = true;
+            path = "";
             for (String p : next.path) {
                 if (first) {
                     first = false;
                 } else {
-                    System.out.print(",");
+                    path+=",";
                 }
-                System.out.print(p);
+                path+=p;
             }
-            System.out.println();
+            System.out.println(path);
         }
         System.out.println();
+        return path;
     }
 
     private static int getNumberOfDoorTurns(Cell next) {
@@ -183,8 +188,8 @@ public class Solution {
         for (Door door : next.doors) {
             total += door.getTurns();
         }
-        System.out.println("Answer: " + total);
-        print(next);
+        
+        //print(next);
         return total;
     }
 
