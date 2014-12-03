@@ -29,7 +29,6 @@ public class Solution {
     }
 
     private static int test(int test, int[] times, int expected) {
-        // TODO Auto-generated method stub
         System.out.println("Test" + (test++));
         System.out.println("times: " + print(times));
         System.out.println("Expected: " + expected);
